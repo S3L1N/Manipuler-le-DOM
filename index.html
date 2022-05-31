@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <h1>Description du DOM</h1>
+    <ul>
+        <li>Le DOM est une interface de programmation</li>
+        <li>L'acronyme signifie : Document Object Model</li>
+        <li>Il représente les noeuds interconnecés (balises) d'une page HTML</li>
+    </ul>
+    <div id="board"></div>
+    <script>
+        let list = document.querySelector("ul"); // permet de pointer le premier élément répondant à la requête spécifiée
+        let listElements = list.querySelectorAll("li"); // permet de pointer tous les éléments répondant à la requête spécifiée : ainsi on récupère tous les éléments enfants de CETTE ul
+
+        console.log("La liste", list);
+        console.log("Les éléments", listElements);
+
+        listElements.forEach(function(element){
+            console.dir(element); // permet de consulter les propriétés d'un élément du DOM
+            element.style.color = "gray";
+        })
+
+//         const box= document.createElement("div"); // div est instancié
+//         box.classList.add("box"); // on modifie sa propriété pour lui ajouter la class .box
+
+//         const board = document.querySelector("#board");
+
+//         for( let i = 1; i <= 10; i++){ // boucle for allant de 1 à 10
+//             let newbox = box.cloneNode(); // nouvelle variable qui a pour valeur un clone de box
+//             newbox.innerText = i;
+//             board.appendChild(newbox); // .box devient l'enfant de #board
+//             box.innerText = 1 // ajoute l'élément "1" dans la boîte
+//         }
+
+// // l'algorithme de mélange de Fisher-Yates3, aussi appelé mélange de Knuth ou algorithme P permet de mélanger aléatoirement
+//         let i = board.children.length, k, temp;
+//         while(--i > 0){ // on boucle tant qu'1 oté de i est tjr positif
+//         // k stocke un nombre aléatoire basé sur i
+//         k = Math.floor(Math.random( )* (i+1))
+//         // temp pointe temporairement l'élément à la position k dans board
+//         temp = board.children[k]
+//         // remplace l'élément à la position k par l'élément à la position i
+//         board.children[k]= board.children[i]
+//         //place l'élement k pointé temporairement à la fin du contenu de board
+//         board.appendChild(temp)
+//         }
+
+// version optimisée
+        function shuffleChildren(parent){
+            let children = parent.children;
+            let i = children.length, k, temp;
+            while(--i > 0){
+                k = Math.floor(Math.random() * (i+1));
+                temp = children[k]
+                children[k] = children[i];
+                parent.appendChild(temp);
+            }
+        }
+        function showReaction(type,clickedBox){ // provoque une réacrion visuelle sur cette même boîte
+            clickedBox.classList.add(type);
+            if(type !== "success"){
+                setTimeout(function(){
+                    clickedBox.classList.remove(type);
+                }, 800)
+            }
+        }
+
+        const box = document.createElement("div");
+        box.classList.add("box");
+
+        const board = document.querySelector("#board");
+        
+        let nb = 1;
+
+        for (let i = 1; i <= 10; i++){
+            const newbox = box.cloneNode();
+            newbox.innerText = i;
+            board.appendChild(newbox);
+
+            //addEventListener permet d'ajouter un énènement à tout élément du DOM
+            newbox.addEventListener("click", function(){ // association de l'évènement " click" aux boîtes du jeu
+                
+                if(i == nb){
+                    newbox.classList.add("box-clicked");
+                    // console.log("Boite n°"+ i +",click !");
+                    // newbox.classList.add("box-clicked");
+// Si nb est t égal au nombre de boites du jeu, c'est que le dernier clic était sur la dernière boite → victoire du joueur ! (Il ne faut pas incrémenter nb avant !)
+                    if(nb == board.children.length){
+                        board.querySelectorAll(".box").forEach(function(box){
+                            showReaction("success", box);
+                        })
+                    }
+                    nb++;
+                }
+
+//  Si le numéro de la boite est supérieur à nb, c'est que le joueur a cliqué une boite trop élevée → game over !
+                else if(i > nb){
+                    showReaction("error", newbox);
+                    nb = 1;
+                    board.querySelectorAll(".box-clicked").forEach(function(clickedBox){ // permet de rédemarrer le jeu
+                        clickedBox.classList.remove("box-clicked");
+                    })
+                }
+
+// Dernière possibilité : le joueur a cliqué sur une boite déjà grisée. On l'informe simplement de cela, le jeu ne redémarre pas
+                else{
+                    showReaction("notice", newbox);
+                }
+            })
+        }
+
+
+
+        shuffleChildren(board);
+    </script>
+</body>
+</html>
